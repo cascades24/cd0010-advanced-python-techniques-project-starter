@@ -39,31 +39,67 @@ class NearEarthObject:
 
         :param info: A dictionary of excess keyword arguments supplied to the constructor.
         """
-        # TODO: Assign information from the arguments passed to the constructor
+        # Done: Assign information from the arguments passed to the constructor
         # onto attributes named `designation`, `name`, `diameter`, and `hazardous`.
         # You should coerce these values to their appropriate data type and
         # handle any edge cases, such as a empty name being represented by `None`
         # and a missing diameter being represented by `float('nan')`.
-        self.designation = ''
-        self.name = None
-        self.diameter = float('nan')
-        self.hazardous = False
+
+
+        print(info.items())
+        #could not find a way to do this more elegantly in the arguments passed to the constructor for default kwargs
+        #setting desisnation
+        if not info['designation']:
+            self.designation = 'None'
+        else:
+            self.designation = str(info['designation'])
+
+        #setting name
+        if not info['name'] or info['name'] == '':
+            self.name = None
+        else:
+            self.name = str(info['name'])
+        
+        #setting diameter
+        if not info['diameter']:
+            self.diameter = float('nan')
+        else:
+            self.diameter = float(info['diameter'])
+
+        #setting hazardous values
+        if not info['hazardous']:
+            self.hazardous = False
+        else:
+            if info['hazardous'] == 'Y':
+                self.hazardous = True
+            else:
+                self.hazardous = False
 
         # Create an empty initial collection of linked approaches.
-        self.approaches = []
+        self.approaches = list(info['approaches'])
+
 
     @property
     def fullname(self):
         """Return a representation of the full name of this NEO."""
-        # TODO: Use self.designation and self.name to build a fullname for this object.
-        return ''
+        # Done: Use self.designation and self.name to build a fullname for this object.
+        return f"{self.designation} ({self.name})"
+    
 
     def __str__(self):
         """Return `str(self)`."""
-        # TODO: Use this object's attributes to return a human-readable string representation.
+        # Done: Use this object's attributes to return a human-readable string representation.
         # The project instructions include one possibility. Peek at the __repr__
         # method for examples of advanced string formatting.
-        return f"A NearEarthObject ..."
+        
+        #defining the modified for the string for the hazardous parameter
+        if self.hazardous:
+            mod_string = "is"
+        else:
+            mod_string = "is not"
+
+        return f"A NearEarthObject with the designation {self.designation} and the name {self.name}," \
+               f"with a diameter of {self.diameter:.3f}km, and {mod_string} hazardous"
 
     def __repr__(self):
         """Return `repr(self)`, a computer-readable string representation of this object."""
@@ -95,13 +131,36 @@ class CloseApproach:
         # onto attributes named `_designation`, `time`, `distance`, and `velocity`.
         # You should coerce these values to their appropriate data type and handle any edge cases.
         # The `cd_to_datetime` function will be useful.
-        self._designation = ''
-        self.time = None  # TODO: Use the cd_to_datetime function for this attribute.
-        self.distance = 0.0
-        self.velocity = 0.0
+        
+        #assigning designation
+        if not info['designation']:
+            self._designation = ''
+        else:
+            self._designation = str(info['designation'])
+
+        #assigning time
+        if not info['time']:
+            self.time = None  # TODO: Use the cd_to_datetime function for this attribute.
+        else:
+            self.time = cd_to_datetime(info['time'])
+        
+        #assinging distance
+        if not info['distance']:
+            self.distance = 0.0
+        else:
+            self.distance = float(info['distance'])
+
+        #assigning velocity
+        if not info['velocity']:
+            self.velocity = 0.0
+        else:
+            self.velocity = info['velocity']
 
         # Create an attribute for the referenced NEO, originally None.
-        self.neo = None
+        if not info['neo']:
+            self.neo = None
+        else: 
+            self.neo = info['neo']
 
     @property
     def time_str(self):
@@ -118,15 +177,23 @@ class CloseApproach:
         """
         # TODO: Use this object's `.time` attribute and the `datetime_to_str` function to
         # build a formatted representation of the approach time.
-        # TODO: Use self.designation and self.name to build a fullname for this object.
-        return ''
+        
+        return f"{datetime_to_str(self.time)}"
+   
+    # Done: Use self.designation and self.name to build a fullname for this object.
+    @property
+    def fullname(self):
+        """Return a representation of the full name of this close approach."""
+        # Done: Use self.designation and self.name to build a fullname for this object.
+        return f"{self.neo} ({datetime_to_str(self.time)})"
 
     def __str__(self):
         """Return `str(self)`."""
-        # TODO: Use this object's attributes to return a human-readable string representation.
+        # Done: Use this object's attributes to return a human-readable string representation.
         # The project instructions include one possibility. Peek at the __repr__
         # method for examples of advanced string formatting.
-        return f"A CloseApproach ..."
+        return f"A CloseApproach by the NEO {self.neo} passing within {self.distance:.2f}AU of Earth" \
+               f" with velocity {self.velocity:.2f} at {datetime_to_str(self.time)}"
 
     def __repr__(self):
         """Return `repr(self)`, a computer-readable string representation of this object."""
