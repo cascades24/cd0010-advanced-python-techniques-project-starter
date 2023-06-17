@@ -24,8 +24,27 @@ def load_neos(neo_csv_path):
     :param neo_csv_path: A path to a CSV file containing data about near-Earth objects.
     :return: A collection of `NearEarthObject`s.
     """
-    # TODO: Load NEO data from the given CSV file.
-    return ()
+    neo_collection = {}
+
+    #making filename
+    if neo_csv_path[-1] != '/':
+        filepath = neo_csv_path + '/neos.csv'
+    else:
+        filepath = neo_csv_path + 'neos.csv'
+
+    #reading in CSV file
+    with open(filepath) as f:
+        reader = csv.reader(f)
+
+        #skipping header line
+        next(reader)
+
+        #iterating through the list
+        for line in reader:
+            neo_collection.add(NearEarthObject(designation=line[3],name=line[4],diameter=line[14],hazardous=line[6],approaches=''))
+
+    # Done: Load NEO data from the given CSV file.
+    return (neo_collection)
 
 
 def load_approaches(cad_json_path):
@@ -34,5 +53,26 @@ def load_approaches(cad_json_path):
     :param cad_json_path: A path to a JSON file containing data about close approaches.
     :return: A collection of `CloseApproach`es.
     """
-    # TODO: Load close approach data from the given JSON file.
-    return ()
+    cad_collection = {}
+
+    #making filename
+    if cad_json_path[-1] != '/':
+        filepath = cad_json_path + '/cad.json'
+    else:
+        filepath = cad_json_path + 'cad.json'
+
+    
+    #loading filename
+    with open (filepath, 'r') as f:
+        cad_data = json.load(f)
+
+    #putting data into set
+    for line in cad_data['data']:
+        cad_collection.add(CloseApproach(designation=line[0],time=line[3],distance=line[4],velocity=line[7],neo=None))
+    
+
+    # Done: Load close approach data from the given JSON file.
+    return (cad_collection)
+
+#test code
+#load_approaches('/Users/natelee/Documents/cd0010-advanced-python-techniques-project-starter/data/')
