@@ -49,25 +49,19 @@ class NearEarthObject:
         print(info.items())
         #could not find a way to do this more elegantly in the arguments passed to the constructor for default kwargs
         #setting designation
-        if not info['designation']:
-            self.designation = 'None'
-        else:
-            self.designation = str(info['designation'])
+        self.designation = str(info.get('designation',''))
 
         #setting name
-        if not info['name'] or info['name'] == '':
+        if info.get('name','') == '':
             self.name = None
         else:
             self.name = str(info['name'])
         
         #setting diameter
-        if not info['diameter']:
-            self.diameter = float('nan')
-        else:
-            self.diameter = float(info['diameter'])
+        self.diameter = float(info.get('diameter','nan'))
 
         #setting hazardous values
-        if not info['hazardous']:
+        if info.get('hazardous',None) == None:
             self.hazardous = False
         else:
             if str(info['hazardous']) == 'Y':
@@ -99,7 +93,7 @@ class NearEarthObject:
             mod_string = "is not"
 
         return f"A NearEarthObject with the designation {self.designation} and the name {self.name}," \
-               f" with a diameter of {self.diameter:.1f}km, and {mod_string} hazardous"
+               f" with a diameter of {self.diameter:.1f}km, and {mod_string} potentially hazardous"
 
     def __repr__(self):
         """Return `repr(self)`, a computer-readable string representation of this object."""
@@ -133,33 +127,19 @@ class CloseApproach:
         # The `cd_to_datetime` function will be useful.
         
         #assigning designation
-        if not info['designation']:
-            self._designation = ''
-        else:
-            self._designation = str(info['designation'])
-
+        self._designation= str(info.get('designation',''))
         #assigning time
-        if not info['time']:
-            self.time = None  # TODO: Use the cd_to_datetime function for this attribute.
+        if info.get('time',None) != None:
+            self.time = cd_to_datetime(info.get('time'))  #Done: Use the cd_to_datetime function for this attribute.
         else:
-            self.time = cd_to_datetime(info['time'])
-        
+            self.time = None
         #assigning distance
-        if not info['distance']:
-            self.distance = float(0.0)
-        else:
-            self.distance = float(info['distance'])
-
+        self.distance = float(info.get('distance',0))
         #assigning velocity
-        if not info['velocity']:
-            self.velocity = 0.0
-        else:
-            self.velocity = info['velocity']
+        self.velocity = float(info.get('velocity',0))
 
         # Create an attribute for the referenced NEO, originally None.
-        if not info['neo']:
-            self.neo = None
-        else: 
+        if not info.get('neo',None) == None:
             self.neo = str(info['neo'])
 
         
@@ -197,9 +177,9 @@ class CloseApproach:
         # The project instructions include one possibility. Peek at the __repr__
         # method for examples of advanced string formatting.
         
-        #return "teststring"
+        #for some reason need to force the variables to floats again 
         return f"A CloseApproach by the NEO {self.neo} passing within {float(self.distance):.4f}AU of Earth, " \
-               f" with velocity {float(self.velocity):.2f} at {datetime_to_str(self.time)}"
+               f" with relative velocity {float(self.velocity):.2f} at {datetime_to_str(self.time)}"
 
     def __repr__(self):
         """Return `repr(self)`, a computer-readable string representation of this object."""
