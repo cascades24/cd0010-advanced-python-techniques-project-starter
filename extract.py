@@ -24,16 +24,18 @@ def load_neos(neo_csv_path):
     :param neo_csv_path: A path to a CSV file containing data about near-Earth objects.
     :return: A collection of `NearEarthObject`s.
     """
-    neo_collection = {}
+    neo_collection = set()
 
     #making filename
-    if neo_csv_path[-1] != '/':
-        filepath = neo_csv_path + '/neos.csv'
-    else:
-        filepath = neo_csv_path + 'neos.csv'
+    #if neo_csv_path[-1] != '/':
+    #    filepath = neo_csv_path + '/neos.csv'
+    #else:
+    #    filepath = neo_csv_path + 'neos.csv'
+    #filepath = neo_csv_path + '/neos.csv'
+    
 
     #reading in CSV file
-    with open(filepath) as f:
+    with open(neo_csv_path) as f:
         reader = csv.reader(f)
 
         #skipping header line
@@ -41,7 +43,7 @@ def load_neos(neo_csv_path):
 
         #iterating through the list
         for line in reader:
-            neo_collection.add(NearEarthObject(designation=line[3],name=line[4],diameter=line[14],hazardous=line[6],approaches=''))
+            neo_collection.add(NearEarthObject(designation=line[3],name=line[4],diameter=line[15],hazardous=line[7],approaches=''))
 
     # Done: Load NEO data from the given CSV file.
     return (neo_collection)
@@ -53,17 +55,18 @@ def load_approaches(cad_json_path):
     :param cad_json_path: A path to a JSON file containing data about close approaches.
     :return: A collection of `CloseApproach`es.
     """
-    cad_collection = {}
+    cad_collection = set()
 
     #making filename
-    if cad_json_path[-1] != '/':
-        filepath = cad_json_path + '/cad.json'
-    else:
-        filepath = cad_json_path + 'cad.json'
-
+    #if cad_json_path[-1] != '/':
+    #    filepath = cad_json_path + '/cad.json'
+    #else:
+    #    filepath = cad_json_path + 'cad.json'
+    #filepath = cad_json_path + '/cad.json'
+    #filepath = cad_json_path
     
     #loading filename
-    with open (filepath, 'r') as f:
+    with open (cad_json_path, 'r') as f:
         cad_data = json.load(f)
 
     #putting data into set
