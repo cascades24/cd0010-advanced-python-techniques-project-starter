@@ -5,11 +5,6 @@ It provides methods to fetch an NEO by primary designation or by name, as well
 as a method to query the set of close approaches that match a collection of
 user-specified criteria.
 
-Under normal circumstances, the main module creates one NEODatabase from the
-data on NEOs and close approaches extracted by `extract.load_neos` and
-`extract.load_approaches`.
-
-You'll edit this file in Tasks 2 and 3.
 """
 
 
@@ -51,6 +46,7 @@ class NEODatabase:
         #linking together NEOs and approaches
         for approach in self._approaches:
             approach.neo = self._neo_des_dict[approach._designation]
+            #print(approach.neo.diameter)
             self._neo_des_dict[approach._designation].approaches.append(approach)
 
 
@@ -106,6 +102,103 @@ class NEODatabase:
         :param filters: A collection of filters capturing user-specified criteria.
         :return: A stream of matching `CloseApproach` objects.
         """
-        # TODO: Generate `CloseApproach` objects that match all of the filters.
+    
         for approach in self._approaches:
-            yield approach
+            
+            #setting singular truth variable that will get set to False if there any of the statements don't pass
+            approach_valid = True
+
+
+            #put in if statements to break it out from one since if statement
+            #multiple lines is longer but is more readable 
+            
+            ###########################
+            #distance compares
+            #min distance
+            if (filters.distance_filter.attribute_min != None
+                and approach.distance < filters.distance_filter.attribute_min):
+                #setting to false if the approach distance min is < the minumum distance
+                approach_valid = False
+
+            #max distance
+            if (filters.distance_filter.attribute_max != None 
+                and approach.distance > filters.distance_filter.attribute_max):
+                #setting to false if the approach distance max is > the maximum distance
+                approach_valid = False
+
+            ############################
+            #diameter compares
+            #min diameter
+            #testing for none filter types, diameter size, and isNan
+            if (filters.diameter_filter.attribute_min != None 
+                and (approach.neo.diameter < filters.diameter_filter.attribute_min 
+                     or approach.neo.diameter != approach.neo.diameter)):
+                #setting to false if the diameter min is < the minumum diameter
+                approach_valid = False
+            #else:
+                #if approach.neo.diameter != float('nan'):
+                #    print(approach.neo.name)
+                #    print(approach.neo.diameter)
+                #    print(filters.diameter_filter.attribute_min)
+
+            #max diameter
+            if (filters.diameter_filter.attribute_max != None 
+                and (approach.neo.diameter > filters.diameter_filter.attribute_max 
+                     or approach.neo.diameter != approach.neo.diameter)):
+                #setting to false if the approach diameter max is > the maximum diameter
+                approach_valid = False
+
+            ############################
+            #velocity compare
+            #min velocity
+            if (filters.velocity_filter.attribute_min != None 
+                and approach.velocity < filters.velocity_filter.attribute_min):
+                #setting to false if the velocity min is < the minumum velocity
+                approach_valid = False
+
+            #max velocity
+            if (filters.velocity_filter.attribute_max != None 
+                and approach.velocity > filters.velocity_filter.attribute_max):
+                #setting to false if the approach velocity max is > the maximum velocity
+                approach_valid = False
+
+            #############################
+            #hazardous compare
+            if (filters.hazard_filter.hazardous != None 
+                and approach.neo.hazardous != filters.hazard_filter.hazardous):
+                #seeing if bool matches with the bool from the approach
+                approach_valid = False
+
+            ##########################
+            #time compare
+            if (filters.date_filter.on_date != None 
+                and approach.time.date() != filters.date_filter.on_date):
+                #seeing if date matches as expected
+                #print(filters.date_filter.on_date)
+                #print(approach.time)
+                #print("comparing dates: " + str(approach.time == filters.date_filter.on_date))
+                approach_valid = False
+            elif approach.time == filters.date_filter.on_date:
+                print(filters.date_filter.on_date)
+                print(type(approach.time.date()))
+                print(type(filters.date_filter.on_date))
+                print(approach.time)
+            
+            #min date
+            if (filters.date_filter.attribute_min != None 
+                and approach.time.date() < filters.date_filter.attribute_min):
+                #setting to false if the date min is < the minumum date
+                approach_valid = False
+
+            #max date
+            if (filters.date_filter.attribute_max != None 
+                and approach.time.date() > filters.date_filter.attribute_max):
+                #setting to false if the approach date max is > the maximum date
+                approach_valid = False
+
+            
+            #if all statements pass 
+            if approach_valid:
+                yield approach
+
+        
