@@ -14,63 +14,90 @@ the supplied `CloseApproach`.
 The `limit` function simply limits the maximum number of values produced by an
 iterator.
 
-You'll edit this file in Tasks 3a and 3c.
 """
-import operator
+import datetime
+import itertools
 
-
-class UnsupportedCriterionError(NotImplementedError):
-    """A filter criterion is unsupported."""
-
-
-class AttributeFilter:
-    """A general superclass for filters on comparable attributes.
-
-    An `AttributeFilter` represents the search criteria pattern comparing some
-    attribute of a close approach (or its attached NEO) to a reference value. It
-    essentially functions as a callable predicate for whether a `CloseApproach`
-    object satisfies the encoded criterion.
-
-    It is constructed with a comparator operator and a reference value, and
-    calling the filter (with __call__) executes `get(approach) OP value` (in
-    infix notation).
-
-    Concrete subclasses can override the `get` classmethod to provide custom
-    behavior to fetch a desired attribute from the given `CloseApproach`.
+class Filters:
+    """Class to contain all of the filters for easy calling in the query function
+    
+    :param distance_filter: the AttributeType class object with the distance filter data
+    :param diameter_filter: the AttributeType class object with the diameter filter data
+    :param velocity_filter: the AttributeType class object with the distance filter data
+    :param date_filter: the DateAttr class object with the date filter data
+    :param hazard_filter: the HazzardAttr class object with the hazard filter data
+    
     """
-    def __init__(self, op, value):
-        """Construct a new `AttributeFilter` from an binary predicate and a reference value.
+    def __init__(self,distance_filter,diameter_filter,
+                 velocity_filter,date_filter,hazard_filter):
+        self.distance_filter = distance_filter
+        self.diameter_filter = diameter_filter
+        self.velocity_filter = velocity_filter
+        self.date_filter = date_filter
+        self.hazard_filter = hazard_filter
 
-        The reference value will be supplied as the second (right-hand side)
-        argument to the operator function. For example, an `AttributeFilter`
-        with `op=operator.le` and `value=10` will, when called on an approach,
-        evaluate `some_attribute <= 10`.
+class AttributeType:
+    """General Class for numerical value filters like distance, """
+    def __init__(self,attribute_name,attribute_max,attribute_min):
+        """Construct a new Attribute Type filter for numerical filters given attribute name, min, and max
 
-        :param op: A 2-argument predicate comparator (such as `operator.le`).
-        :param value: The reference value to compare against.
+        This class serves as collection for the paramters categorized by type, i.e. diameter
+
+        :param attribute_name: attribute name (i.e. diameter).
+        :param attribute_max: Maximum attribute value as passed into constructor
+        :param attribute_min: Minimum attribute value as passed into constructor
         """
-        self.op = op
-        self.value = value
+        self.attribute_name = attribute_name
+        if attribute_max != None and type(attribute_max) != datetime.date:
+            self.attribute_max = float(attribute_max)
+        else:
+            self.attribute_max = attribute_max
 
-    def __call__(self, approach):
-        """Invoke `self(approach)`."""
-        return self.op(self.get(approach), self.value)
-
-    @classmethod
-    def get(cls, approach):
-        """Get an attribute of interest from a close approach.
-
-        Concrete subclasses must override this method to get an attribute of
-        interest from the supplied `CloseApproach`.
-
-        :param approach: A `CloseApproach` on which to evaluate this filter.
-        :return: The value of an attribute of interest, comparable to `self.value` via `self.op`.
-        """
-        raise UnsupportedCriterionError
+        if attribute_min != None and type(attribute_min) != datetime.date:
+            self.attribute_min = float(attribute_min)
+        else:
+            self.attribute_min = attribute_min
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(op=operator.{self.op.__name__}, value={self.value})"
+        """Return `repr(self)`, a computer-readable string representation of this object."""
+        return f"{self.__class__.__name__}(attribute_name={self.attribute_name},"\
+            f" attribute_max={self.attribute_max}, "\
+            f" attribute_min={self.attribute_min})"
 
+class DateAttr(AttributeType):
+    def __init__(self,attribute_name, attribute_max, attribute_min,on_date):
+        super().__init__(attribute_name, attribute_max, attribute_min)
+        """Construct a subclass of Attribute Type for the date filter
+
+        This class serves as collection for the paramters categorized by type, 
+        and including a parameter for a singular date
+
+        :param attribute_name: attribute name (i.e. diameter).
+        :param attribute_max: Maximum attribute value as passed into constructor
+        :param attribute_min: Minimum attribute value as passed into constructor
+        :param on_date: A singular data provided into the filter 
+        """
+        #approaches on the current date 
+        if on_date != None:
+            if type(on_date) is not datetime.date:
+                self.on_date = datetime.datetime.strptime(on_date,"%Y-%m-%d")
+            else:
+                self.on_date = on_date
+        else: 
+            self.on_date = None
+    
+    
+class HazardAttr:
+    def __init__(self,attribute_name,hazardous):
+
+        self.attribute_name = attribute_name
+        #this gets passed in as a bool by the args function
+        self.hazardous = hazardous
+
+    def __repr__(self):
+        """Return `repr(self)`, a computer-readable string representation of this object."""
+        return f"{self.__class__.__name__}(attribute_name={self.attribute_name},"\
+            f" hazardous={self.hazardous}, "
 
 def create_filters(
         date=None, start_date=None, end_date=None,
@@ -106,10 +133,17 @@ def create_filters(
     :param diameter_min: A minimum diameter of the NEO of a matching `CloseApproach`.
     :param diameter_max: A maximum diameter of the NEO of a matching `CloseApproach`.
     :param hazardous: Whether the NEO of a matching `CloseApproach` is potentially hazardous.
-    :return: A collection of filters for use with `query`.
+    :return: A class object of Filters with stored for use with `query`.
     """
-    # TODO: Decide how you will represent your filters.
-    return ()
+    
+    #builing the class object with the filters 
+    filters = Filters(AttributeType("Distance",distance_max,distance_min),
+                      AttributeType("Diameter",diameter_max,diameter_min),
+                      AttributeType("Velocity",velocity_max,velocity_min),
+                      DateAttr("Date",end_date,start_date,date),
+                      HazardAttr("Hazardous",hazardous))
+
+    return filters
 
 
 def limit(iterator, n=None):
@@ -121,5 +155,8 @@ def limit(iterator, n=None):
     :param n: The maximum number of values to produce.
     :yield: The first (at most) `n` values from the iterator.
     """
-    # TODO: Produce at most `n` values from the given iterator.
-    return iterator
+    #if condition if n is not None and not zero 
+    if n != None and n != 0:
+        return itertools.islice(iterator, n)
+    else:
+        return iterator
