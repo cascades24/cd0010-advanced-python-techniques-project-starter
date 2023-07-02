@@ -10,7 +10,6 @@ formatted as described in the project instructions, into a collection of
 The main module calls these functions with the arguments provided at the command
 line, and uses the resulting collections to build an `NEODatabase`.
 
-You'll edit this file in Task 2.
 """
 import csv
 import json
@@ -24,15 +23,9 @@ def load_neos(neo_csv_path):
     :param neo_csv_path: A path to a CSV file containing data about near-Earth objects.
     :return: A collection of `NearEarthObject`s.
     """
-    neo_collection = set()
 
-    #making filename
-    #if neo_csv_path[-1] != '/':
-    #    filepath = neo_csv_path + '/neos.csv'
-    #else:
-    #    filepath = neo_csv_path + 'neos.csv'
-    #filepath = neo_csv_path + '/neos.csv'
-    
+    #defining empty set to store the NEO data
+    neo_collection = set()
 
     #reading in CSV file
     with open(neo_csv_path) as f:
@@ -43,9 +36,10 @@ def load_neos(neo_csv_path):
 
         #iterating through the list
         for line in reader:
-            neo_collection.add(NearEarthObject(designation=line[3],name=line[4],diameter=line[15],hazardous=line[7],approaches=''))
+            neo_collection.add(NearEarthObject(designation=line[3],name=line[4],
+                                diameter=line[15],hazardous=line[7],approaches=''))
 
-    # Done: Load NEO data from the given CSV file.
+    #returning neo collection
     return (neo_collection)
 
 
@@ -55,27 +49,17 @@ def load_approaches(cad_json_path):
     :param cad_json_path: A path to a JSON file containing data about close approaches.
     :return: A collection of `CloseApproach`es.
     """
+    #creating empty set for close approach data 
     cad_collection = set()
 
-    #making filename
-    #if cad_json_path[-1] != '/':
-    #    filepath = cad_json_path + '/cad.json'
-    #else:
-    #    filepath = cad_json_path + 'cad.json'
-    #filepath = cad_json_path + '/cad.json'
-    #filepath = cad_json_path
-    
     #loading filename
     with open (cad_json_path, 'r') as f:
         cad_data = json.load(f)
 
     #putting data into set
     for line in cad_data['data']:
-        cad_collection.add(CloseApproach(designation=line[0],time=line[3],distance=line[4],velocity=line[7],neo=None))
+        cad_collection.add(CloseApproach(designation=line[0],time=line[3],
+                            distance=line[4],velocity=line[7],neo=None))
     
-
-    # Done: Load close approach data from the given JSON file.
+    #returning object collection
     return (cad_collection)
-
-#test code
-#load_approaches('/Users/natelee/Documents/cd0010-advanced-python-techniques-project-starter/data/')
