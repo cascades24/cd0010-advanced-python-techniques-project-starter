@@ -8,7 +8,6 @@ These functions are invoked by the main module with the output of the `limit`
 function and the filename supplied by the user at the command line. The file's
 extension determines which of these functions is used.
 
-You'll edit this file in Part 4.
 """
 import csv
 import json
@@ -24,12 +23,28 @@ def write_to_csv(results, filename):
     :param results: An iterable of `CloseApproach` objects.
     :param filename: A Path-like object pointing to where the data should be saved.
     """
+
+    #defining fieldnames for the first row
     fieldnames = (
         'datetime_utc', 'distance_au', 'velocity_km_s',
         'designation', 'name', 'diameter_km', 'potentially_hazardous'
     )
-    # TODO: Write the results to a CSV file, following the specification in the instructions.
 
+    #Opening CSV writer 
+    with open(filename,'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+
+        csvwriter.writerow(fieldnames)
+
+
+        #iterating through results and putting the info into a row for each result
+        for result in results:
+            ca_results = result.serialize()
+            neo_results = result.neo.serialize()
+            row = [ca_results['datetime_utc'], ca_results['distance_au'], ca_results['velocity_km_s'],
+                   neo_results['designation'], neo_results['name'], 
+                   neo_results['diameter_km'], neo_results['potentially_hazardous']]
+            csvwriter.writerow(row)   
 
 def write_to_json(results, filename):
     """Write an iterable of `CloseApproach` objects to a JSON file.
@@ -42,4 +57,14 @@ def write_to_json(results, filename):
     :param results: An iterable of `CloseApproach` objects.
     :param filename: A Path-like object pointing to where the data should be saved.
     """
-    # TODO: Write the results to a JSON file, following the specification in the instructions.
+    #opening JSON writer and using the .serialize method to pass info
+    with open(filename, 'w') as outfile:
+
+        #creating the list to dump the results to the JSON file
+        json_list = []
+        for result in results:
+            json_list.append(result.serialize())
+    
+    
+        json.dump(json_list, outfile, indent=4)
+    
